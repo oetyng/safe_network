@@ -28,7 +28,7 @@ use sn_dbc::{DbcId, SignedSpend};
 use bls::{PublicKey, SecretKey, Signature};
 use futures::future::select_all;
 use itertools::Itertools;
-use libp2p::{kad::RecordKey, PeerId};
+use libp2p::kad::RecordKey;
 use tokio::task::spawn;
 use tracing::trace;
 use xor_name::XorName;
@@ -166,17 +166,6 @@ impl Client {
                     address.name()
                 );
                 Err(Error::Protocol(ProtocolError::UnexpectedResponses))
-            }
-        }
-    }
-
-    /// This is for network testing only
-    pub async fn get_closest(&self, dst: XorName) -> Vec<PeerId> {
-        match self.network.client_get_closest_peers(dst).await {
-            Ok(peers) => peers,
-            Err(err) => {
-                warn!("Failed to get_closest of {dst:?} with error {err:?}");
-                vec![]
             }
         }
     }
