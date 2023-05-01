@@ -139,7 +139,7 @@ impl Node {
                 let network = self.network.clone();
                 let _handle = spawn(async move {
                     trace!("Getting closest peers for target {target:?}");
-                    let result = network.node_get_closest_peers(target).await;
+                    let result = network.node_query_for_closest_peers(target).await;
                     trace!("For target {target:?}, get closest peers {result:?}");
                 });
             }
@@ -330,7 +330,7 @@ impl Node {
                         };
                         match self
                             .network
-                            .fire_and_forget_to_closest(&Request::Event(event))
+                            .fire_and_forget_to_local_closest(&Request::Event(event))
                             .await
                         {
                             Ok(_) => {}
@@ -351,7 +351,7 @@ impl Node {
                         {
                             match self
                                 .network
-                                .node_send_to_closest(&Request::Event(event))
+                                .node_send_to_queried_closest(&Request::Event(event))
                                 .await
                             {
                                 Ok(_) => {}
@@ -403,7 +403,7 @@ impl Node {
     /// Retrieve a `Spend` from the closest peers
     async fn get_spend(&self, address: DbcAddress) -> Result<SignedSpend> {
         let request = Request::Query(Query::Spend(SpendQuery::GetDbcSpend(address)));
-        let responses = self.network.node_send_to_closest(&request).await?;
+        let responses = self.network.node_send_to_queried_closest(&request).await?;
 
         // Get all Ok results of the expected response type `GetDbcSpend`.
         let spends: Vec<_> = responses
